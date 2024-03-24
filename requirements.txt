@@ -1,0 +1,7 @@
+flask
+firebase
+pyrebase4
+firebase_admin
+
+
+retrive email(from logging) => retrive doc id => retrive details => print in consle => print in interface 
