@@ -107,11 +107,145 @@ def createstudentaccount(file_path):
             print(f"added {name}")
             
     print("added succesfully")
+    
 
+def createteacheraccount(file_path):    
+    print("entered")
+        # Open the CSV file for reading
+    with open(file_path, 'r') as csvfile:
+        # Create a CSV reader object
+        csv_reader = csv.DictReader(csvfile)
+        
+        # Loop over each row in the CSV file
+        print("started")
+        for row in csv_reader:
+            # Extract details from the row
+            name = row['Name']
+            email = row['Email']
+            subject_name = row['subject_name']
+
+            
+            # Create a dictionary to store the details
+            data = {
+                'name': name,
+                'email': email,
+                'subject_name': subject_name,
+                'role': 'teacher'
+            }
+            
+            # Add the details to the Firestore database
+            # Replace 'students' with the name of your Firestore collection
+            teacherpassword=123456
+            auth.create_user_with_email_and_password(email,teacherpassword)
+            db.collection(user['collection']).add(data)
+            print(f"added {name}")
+            
+    print("added succesfully")
+    
+    
+def createadminaccount(file_path):    
+    print("entered")
+        # Open the CSV file for reading
+    with open(file_path, 'r') as csvfile:
+        # Create a CSV reader object
+        csv_reader = csv.DictReader(csvfile)
+        
+        # Loop over each row in the CSV file
+        print("started")
+        for row in csv_reader:
+            # Extract details from the row
+            name = row['Name']
+            email = row['Email']
+            
+
+            
+            # Create a dictionary to store the details
+            data = {
+                'name': name,
+                'email': email,
+                
+                'role': 'admin'
+            }
+            
+            # Add the details to the Firestore database
+            # Replace 'students' with the name of your Firestore collection
+            adminpassword=123456
+            auth.create_user_with_email_and_password(email,adminpassword)
+            db.collection(user['collection']).add(data)
+            print(f"added {name}")
+            
+    print("added succesfully")
+    
+
+# def adddetails(file_path):    
+#     print("entered")
+#         # Open the CSV file for reading
+#     with open(file_path, 'r') as csvfile:
+#         # Create a CSV reader object
+#         csv_reader = csv.DictReader(csvfile)
+        
+#         # Loop over each row in the CSV file
+#         print("started")
+#         for row in csv_reader:
+#             # Extract details from the row
+#             name = row['Name']
+#             email = row['Email']
+            
+
+            
+#             # Create a dictionary to store the details
+#             data = {
+#                 'name': name,
+#                 'email': email,
+#                 'role': 'admin'
+#             }
+            
+#             # Add the details to the Firestore database
+#             # Replace 'students' with the name of your Firestore collection
+#             adminpassword=123456
+#             auth.create_user_with_email_and_password(email,adminpassword)
+#             db.collection(user['collection']).add(data)
+#             print(f"added {name}")
+            
+#     print("added succesfully")
+  
+def add(file_path):    
+    print("entered")
+        # Open the CSV file for reading
+    with open(file_path, 'r') as csvfile:
+        # Create a CSV reader object
+        csv_reader = csv.DictReader(csvfile)
+        
+        # Loop over each row in the CSV file
+        print("started")
+        for row in csv_reader:
+            # Extract details from the row
+            name = row['Name']
+            email = row['Email']
+            subject_name = row['subject_name']
+
+            
+            # Create a dictionary to store the details
+            data = {
+                'name': name,
+                'email': email,
+                'subject_name': subject_name,
+                'role': 'teacher'
+            }
+            
+            # Add the details to the Firestore database
+            # Replace 'students' with the name of your Firestore collection
+            teacherpassword=123456
+            auth.create_user_with_email_and_password(email,teacherpassword)
+            db.collection(user['collection']).add(data)
+            print(f"added {name}")
+            
+    print("added succesfully")
+    
 def get_profile(collection,docid):
     global userdetails
     print(collection,docid)
-    doc_ref = db.collection(user['collection']).document(user['docid'])
+    doc_ref = db.collection(collection).document(docid)
     doc = doc_ref.get()
     if doc.exists:
         userdetails = doc.to_dict()
@@ -120,11 +254,15 @@ def get_profile(collection,docid):
         
     
 def get_docid(email):
+    global user
+    print(email)
     for collection in docs:
         query = collection.where('email', '==', email).limit(1).stream()
         for doc in query:
+            print(doc.id)
             user['docid']=doc.id
             user['collection']=collection.id
+        print(user)
             
             
             
@@ -174,8 +312,10 @@ def login():
             auth.sign_in_with_email_and_password(email, password)
             session.append(email)
             get_docid( email)
+            print("entering in login")
+            print(user)
             get_profile(user['collection'],user['docid'])
-            # print(userdetails)
+            print(userdetails)
             return render_template('home/logged.html')
         except Exception as e:
             print(f"error:- {e}")
@@ -198,13 +338,37 @@ def profile():
 @app.route('/workflow', methods=['GET','POST'])
 def workflow():
     if request.method == 'POST':
-        if 'student_csv' in request.files:
+        if 'student_csv' in request.files and 'teacher_csv' in request.files and 'admin_csv' in request.files :
+
+            print(request.files)
             student_csv = request.files['student_csv']
-            if student_csv.filename != '':
-                file_path = os.path.join(app.config['UPLOAD_FOLDER'], 'student.csv')
-                student_csv.save(file_path)
-                print(file_path)
-                createstudentaccount(file_path)
+            teacher_csv = request.files['teacher_csv']
+            admin_csv = request.files['admin_csv']
+            # details_csv = request.files['details_csv']
+            # teacher_csv.save('G:\open-house\uploads\teacher.csv')
+            if student_csv.filename != '' and teacher_csv.filename != '' and admin_csv.filename != '':
+                # student data 
+                file_path_student = os.path.join(app.config['UPLOAD_FOLDER'], 'student.csv')
+                student_csv.save(file_path_student)
+                createstudentaccount(file_path_student)
+
+                # teacher data 
+                file_path_teacher = os.path.join(app.config['UPLOAD_FOLDER'], 'teacher.csv')
+                teacher_csv.save(file_path_teacher)
+                print(file_path_teacher)
+                # createteacheraccount(file_path_teacher)
+                
+                # admin data
+                file_path_admin = os.path.join(app.config['UPLOAD_FOLDER'], 'admin.csv')
+                admin_csv.save(file_path_admin)
+                createadminaccount(file_path_admin)
+                
+               # details of the organization 
+                # file_path_details = os.path.join(app.config['UPLOAD_FOLDER'], 'details.csv')
+                # student_csv.save(file_path_details)
+                # adddetails(file_path_details)
+
+                
                 
             else:
                 print("No file selected!")
