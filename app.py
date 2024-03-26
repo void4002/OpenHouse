@@ -7,6 +7,8 @@ from firebase_admin import firestore
 from firebase_admin import credentials
 from firebase_admin import storage
 import os
+from questiongeneration import get_pdf_text, get_text_chunks, get_vector_store, get_conversational_chain, user_input
+import json
 
 app = Flask(__name__)
 app.secret_key = "your_secret_key"  
@@ -73,6 +75,14 @@ def createaccount(name, email, password, organization):
     except Exception as e:
         print(f"error {e}")
         return "error"
+    
+    
+def createquestions(path):
+    raw_text = get_pdf_text(path)
+    text_chunks = get_text_chunks(raw_text)
+    get_vector_store(text_chunks)
+    response = user_input()
+    return response
     
 def createstudentaccount(file_path):
     print("entered")
@@ -281,9 +291,9 @@ def home():
 def notlogged():
     return render_template('home/notlogged.html')
 
-@app.route('/logged', methods=['GET', 'POST'])
-def logged():
-    return render_template('home/logged.html')
+# @app.route('/logged', methods=['GET', 'POST'])
+# def logged():
+#     return render_template('home/logged.html')
 
 
 @app.route('/signin', methods = ['GET', 'POST'])
@@ -316,11 +326,27 @@ def login():
             print(user)
             get_profile(user['collection'],user['docid'])
             print(userdetails)
-            return render_template('home/logged.html')
+            if userdetails['role'] == 'teacher':
+                return redirect(url_for('teacher'))
+            elif userdetails['role'] == 'student':
+                return redirect(url_for('student'))
+            elif userdetails['role'] == 'admin':
+                return redirect(url_for('admin'))
         except Exception as e:
             print(f"error:- {e}")
             pass
     return render_template('auth/login.html')
+@app.route('/stduent', methods=['GET', 'POST'])
+def student():
+    return render_template('home/student.html')
+
+@app.route('/teacher', methods=['GET', 'POST'])
+def teacher():
+    return render_template('home/teacher.html')
+
+@app.route('/admin',methods=['GET', 'POST'])
+def admin():
+    return render_template('home/logged.html')
 
 @app.route('/logout', methods=['GET','POST'])
 def logout():
@@ -375,17 +401,22 @@ def workflow():
                 return 'No file selected!'
             
     return render_template('components/workflow.html')
-        
-        
 
 
+@app.route('/update_lesson', methods=['POST', 'GET'])
+def update_lesson():
+    response_text = ''
+    if request.method == 'POST':
+        if 'lesson_pdf' in request.files:
+            lesson = request.files['lesson_pdf']
+            file_path_lesson = os.path.join(app.config['UPLOAD_FOLDER'], 'lesson.pdf')
+            lesson.save(file_path_lesson)
+            response = createquestions(file_path_lesson)
+            response_text = response['output_text']
+            
+            response_text = json.loads(response_text)
+    return render_template('components/update_lesson.html', response=response)
 
-
-         
-        
-        
-    
-    
 
 if __name__ == '__main__':
     app.run(debug=True)

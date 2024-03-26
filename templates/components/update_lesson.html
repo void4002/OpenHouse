@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Update Lesson</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100">
+    <nav class="bg-white shadow">
+        <!-- Nav content... -->
+    </nav>
+
+    <header class="bg-white shadow">
+        <!-- Header content... -->
+    </header>
+
+    <!-- Update Lesson form -->
+    <div class="max-w-6xl mx-auto px-4 py-8">
+        <h2 class="text-2xl font-bold text-gray-900 mb-4">Update Lesson</h2>
+        <form  method="POST" enctype="multipart/form-data">
+            <div class="mb-4">
+                <label for="lesson_file" class="block text-gray-700 font-bold mb-2">Lesson PDF:</label>
+                <input type="file" id="lesson_file" name="lesson_pdf" accept=".pdf" class="border-2 border-gray-300 p-2 w-full">
+            </div>
+            <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded">Upload Lesson</button>
+        </form>
+{% for category, questions in response.items() %}
+<div class="category mb-8">
+  <h2 class="text-xl font-bold mb-4">{{ category }}:</h2>
+  <div class="questions">
+    {% for question in questions %}
+    <div class="question">{{ loop.index }}. {{ question.stem }}: {{ question.question }}</div>
+    {% endfor %}
+  </div>
+</div>
+{% endfor %}
+
+
+
+
+
+
+</body>
+</html>
