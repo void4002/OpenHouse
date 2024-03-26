@@ -203,15 +203,28 @@ def get_docid(email):
     global user
     user['docid']=''
     user['collection']=''
-    print(f"{email}")
+    print(f"geting docid of {email}")
+    doc_found = False
+    docs = db.collections()
     for collection in docs:
+        print("entered1")
         query = collection.where('email', '==', email).limit(1).stream()
+        print("entered2")
         for doc in query:
+            print("entered 3")
             print(doc.id)
+            
+            dummy_id = doc.id
+            print("checking in get_docid")
             user['docid']=doc.id
             user['collection']=collection.id
-        print(f" get docid {user}")
-            
+            print(f" got docid {user}")
+            break
+        
+    print(f" got docid {user}")
+  
+    return dummy_id
+        
             
             
 
@@ -252,9 +265,10 @@ def login():
         email = request.form['email']
         password = request.form['password']
         try:
-            auth.sign_in_with_email_and_password(email, password)
+            userw = auth.sign_in_with_email_and_password(email, password)
+            print("authentication done")
             session.append(email)
-            get_docid( email)
+            dummyvariable = get_docid( email)
             print("entering in login")
             print(user)
             if user['docid']:
@@ -262,25 +276,25 @@ def login():
                 print(userdetails)
                 if userdetails:
                     if userdetails['role'] == 'teacher':
-                        return redirect(url_for('teacher'))
+                        return redirect(url_for('teacher', docid=user['docid']))
                     elif userdetails['role'] == 'student':
-                        return redirect(url_for('student'))
+                        return redirect(url_for('student', docid = user['docid']))
                     elif userdetails['role'] == 'admin':
-                        return redirect(url_for('admin'))
+                        return redirect(url_for('admin', docid = user['docid']))
         except Exception as e:
             print(f"error:- {e}")
             pass
     return render_template('auth/login.html')
-@app.route('/stduent', methods=['GET', 'POST'])
-def student():
+@app.route('/stduent/<docid>', methods=['GET', 'POST'])
+def student(docid):
     return render_template('home/student.html')
 
-@app.route('/teacher', methods=['GET', 'POST'])
-def teacher():
+@app.route('/teacher/<docid>', methods=['GET', 'POST'])
+def teacher(docid):
     return render_template('home/teacher.html')
 
-@app.route('/admin',methods=['GET', 'POST'])
-def admin():
+@app.route('/admin/<docid>',methods=['GET', 'POST'])
+def admin(docid):
     return render_template('home/logged.html')
 
 @app.route('/logout', methods=['GET','POST'])
