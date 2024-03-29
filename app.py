@@ -242,6 +242,10 @@ def home():
 def notlogged():
     return render_template('home/notlogged.html')
 
+@app.route('/logged', methods=['GET', 'POST'])
+def logged():
+    return render_template('home/logged.html')
+
 @app.route('/signin', methods = ['GET', 'POST'])
 def signin():
     if request.method == 'POST':
@@ -358,11 +362,11 @@ def update_lesson():
             lesson = request.files['lesson_pdf']
             file_path_lesson = os.path.join(app.config['UPLOAD_FOLDER'], 'lesson.pdf')
             lesson.save(file_path_lesson)
-            response = createquestions(file_path_lesson)
-            response_text = response['output_text']
+            #response = createquestions(file_path_lesson)
+            #response_text = response['output_text']
             
-            response_text = json.loads(response_text)
-    return render_template('components/update_lesson.html', response=response)
+            #response_text = json.loads(response_text)
+    return render_template('components/update_lesson.html')
 
 
 if __name__ == '__main__':
