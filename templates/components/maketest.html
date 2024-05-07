@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Create Test</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: black;
+            color: white;
+            font-family: 'Montserrat', sans-serif; /* Use the same Google font */
+            font-weight: 500;
+        }
+
+        .nav-link-violet {
+            color: #7c3aed; /* Violet link color */
+        }
+
+        .nav-link-violet:hover {
+            color: #6d28d9; /* Darker violet on hover */
+        }
+
+        .btn-violet {
+            background-color: #7c3aed; /* Violet button background color */
+            color: #fff; /* White text color */
+            transition: background-color 0.3s ease;
+        }
+
+        .btn-violet:hover {
+            background-color: #6d28d9; /* Darker violet on hover */
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="bg-black shadow">
+        <div class="max-w-6xl mx-auto px-4">
+            <div class="flex justify-between">
+                <div class="flex space-x-4">
+                    <!-- Logo -->
+                    <div>
+                        <a href="#" class="flex items-center py-5 px-2 text-white hover:text-gray-200">
+                            <span class="font-bold">Dashboard</span>
+                        </a>
+                    </div>
+                    <!-- Primary Nav Links -->
+                    <div class="hidden md:flex items-center space-x-1">
+                        <a href="#" class="py-5 px-3 nav-link-violet text-white hover:text-gray-200">Home</a>
+                        <a href="#" class="py-5 px-3 nav-link-violet text-white hover:text-gray-200">About</a>
+                        <a href="#" class="py-5 px-3 nav-link-violet text-white hover:text-gray-200">Services</a>
+                        <a href="#" class="py-5 px-3 nav-link-violet text-white hover:text-gray-200">Contact</a>
+                    </div>
+                </div>
+                <!-- User Nav -->
+                <div class="flex items-center space-x-1">
+                    <a href="/profile/{{ docid }}" class="flex nav-link-violet items-center py-2 px-3 text-white hover:text-gray-200">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path d="M12 12a5 5 0 100-10 5 5 0 000 10zm0 2c-2.7 0-8 1.3-8 4v3h16v-3c0-2.7-5.3-4-8-4z" />
+                        </svg>
+                        <span class="hidden nav-link-violet md:block">Profile</span>
+                    </a>
+                    <span class="py-5 px-3 text-white">Welcome, User!</span>
+                    <a href="/logout" class="py-2 px-3 btn-violet rounded hover:bg-violet-600">Logout</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+<div class="container mx-auto py-8">
+    <h1 class="text-3xl font-bold text-center text-purple-600 mb-8">Create Test</h1>
+
+    <form method="POST" class="flex flex-col items-center">
+        <div class="flex justify-center mb-4">
+            <!-- Class selection -->
+            <div class="mr-4">
+                <!-- Class label -->
+                <label for="class-input" class="block text-gray-700 font-bold mb-2">Class:</label>
+                <!-- Class dropdown -->
+                <select id="class-input" name="class" class="bg-white border border-gray-400 rounded-md py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-indigo-500">
+                    <!-- Class options -->
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                    <option value="5">5</option>
+                    <option value="6">6</option>
+                    <option value="7">7</option>
+                    <option value="8">8</option>
+                    <option value="9">9</option>
+                    <option value="10">10</option>
+                </select>
+            </div>
+
+            <!-- Section selection -->
+            <div class="mr-4">
+                <!-- Section label -->
+                <label for="section-input" class="block text-gray-700 font-bold mb-2">Section:</label>
+                <!-- Section dropdown -->
+                <select id="section-input" name="section" class="bg-white border border-gray-400 rounded-md py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-indigo-500">
+                    <!-- Section options -->
+                    <option value="A">A</option>
+                    <option value="B">B</option>
+                    <option value="C">C</option>
+                    <option value="D">D</option>
+                </select>
+            </div>
+
+            <!-- Subject selection -->
+            <div class="mr-4">
+                <!-- Subject label -->
+                <label for="subject-input" class="block text-gray-700 font-bold mb-2">Subject:</label>
+                <!-- Subject dropdown -->
+                <select id="subject-input" name="subject" class="bg-white border border-gray-400 rounded-md py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-indigo-500">
+                    <!-- Subject options -->
+                    <option value="Science">Science</option>
+                    <option value="English">English</option>
+                </select>
+            </div>
+
+            <!-- Lesson selection -->
+            <div>
+                <!-- Lesson label -->
+                <label for="lesson-input" class="block text-gray-700 font-bold mb-2">Lesson:</label>
+                <!-- Lesson dropdown -->
+                <select id="lesson-input" name="lesson" class="bg-white border border-gray-400 rounded-md py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-indigo-500">
+                    <!-- Lesson options -->
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                    <option value="5">5</option>
+                    <option value="6">6</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Submit button -->
+        <div class="flex justify-center">
+            <button type="submit" class="bg-purple-600 text-white px-4 py-2 rounded-md hover:bg-purple-700 focus:outline-none focus:bg-purple-700">Create Test</button>
+        </div>
+    </form>
+</div>
+
+</body>
+</html>

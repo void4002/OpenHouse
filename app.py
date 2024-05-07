@@ -1,4 +1,5 @@
 from flask import Flask, render_template, request, redirect, url_for, session
+from csv import  DictWriter
 import csv
 import pyrebase
 import firebase
@@ -9,6 +10,22 @@ from firebase_admin import storage
 import os
 from questiongeneration import get_pdf_text, get_text_chunks, get_vector_store, get_conversational_chain, user_input
 import json
+from supabase import create_client, Client
+from dotenv import load_dotenv
+from studenttest import retrivequestions
+import plotly.graph_objs as go
+from flask import jsonify
+from datetime import datetime
+# from studenttest import getmytests
+import re
+
+
+
+load_dotenv()
+url = os.environ.get("SUPABASE_URL")
+key = os.environ.get("SUPABASE_KEY")
+
+supabase = create_client(url, key)
 
 app = Flask(__name__)
 app.secret_key = "your_secret_key"  
@@ -42,6 +59,7 @@ user = {
     'docid': '',
     
 }
+truetestkeys = []
 userdetails = {}
 
 # path for saving the files 
@@ -49,7 +67,35 @@ current_dir = os.path.dirname(os.path.abspath(__file__))
 UPLOAD_FOLDER = os.path.join(current_dir, 'uploads')
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
+
 # Funtions 
+def getmytests():
+    print(f"get my  tests {userdetails}")
+
+    user_class = userdetails['class']
+    user_section = userdetails['section']
+    # Regular expression to extract class, section, subject, and lesson from true_keys
+    key_regex = r'(\d+)-(\w+)-(\w+)-(\d+)'
+    
+    tests = []
+    
+    for key in truetestkeys:
+        match = re.match(key_regex, key)
+        print(f" in getmytests function {key_regex}, {key}, {match}")
+        if match:
+            matched_class = match.group(1)
+            matched_section = match.group(2)
+            matched_subject = match.group(3)
+            matched_lesson = match.group(4)
+            print(matched_class, matched_section)
+            if matched_class == user_class and matched_section == user_section:
+                tests.append((matched_subject, matched_lesson))
+    
+    print(f"in the get my tests {tests}")
+    return tests
+    
+def getquestions():
+    data = supabase.table("questions").select("question, class").eq("subject", userdetails['subject']).execute()
 def reset():
     global userdetails, user
     userdetails= {}
@@ -58,6 +104,18 @@ def reset():
     'docid': '',
     
 }
+def gettestdetails():
+    global truetestkeys
+    doc_ref = db.collection(user['collection']).document("test")
+    doc = doc_ref.get().to_dict()
+    if doc:
+        for key, value in doc.items():
+            if value is True:
+                truetestkeys.append(key)
+    print(f"getting test in fucntion {truetestkeys}")
+    return truetestkeys
+
+    
 
 def createaccount(name, email, password, organization):
     data = {
@@ -81,7 +139,9 @@ def createquestions(path):
     raw_text = get_pdf_text(path)
     text_chunks = get_text_chunks(raw_text)
     get_vector_store(text_chunks)
-    response = user_input()
+    #subjective questions-1 
+    # mcqs - 0
+    response = user_input(0)
     return response
     
 def createstudentaccount(file_path):
@@ -185,6 +245,13 @@ def createadminaccount(file_path):
             
 #     print("added succesfully")
   
+def createtest(collection, classname, section, subject, lesson):
+    print(collection)
+    
+    collection_ref = db.collection(collection).document("test")
+    testid = f"{classname}-{section}-{subject}-{lesson}"
+    collection_ref.update({testid: True})
+    
 
     
 def get_profile(collection,docid):
@@ -228,7 +295,7 @@ def get_docid(email):
             
             
 
-    
+
 
 @app.route('/', methods=['GET', 'POST'])
 def home():
@@ -241,10 +308,6 @@ def home():
 @app.route('/notlogged', methods=['GET', 'POST'])
 def notlogged():
     return render_template('home/notlogged.html')
-
-@app.route('/logged', methods=['GET', 'POST'])
-def logged():
-    return render_template('home/logged.html')
 
 @app.route('/signin', methods = ['GET', 'POST'])
 def signin():
@@ -282,6 +345,7 @@ def login():
                     if userdetails['role'] == 'teacher':
                         return redirect(url_for('teacher', docid=user['docid']))
                     elif userdetails['role'] == 'student':
+                        gettestdetails()
                         return redirect(url_for('student', docid = user['docid']))
                     elif userdetails['role'] == 'admin':
                         return redirect(url_for('admin', docid = user['docid']))
@@ -289,17 +353,82 @@ def login():
             print(f"error:- {e}")
             pass
     return render_template('auth/login.html')
-@app.route('/stduent/<docid>', methods=['GET', 'POST'])
+
+def read_csv(filename):
+    with open(filename, 'r') as file:
+        reader = csv.reader(file)
+        data = list(reader)
+    return data
+
+def write_csv(file_path, data):
+    with open(file_path, mode='w', newline='') as file:
+        writer = DictWriter(file, fieldnames=data[0].keys())
+        writer.writeheader()
+        writer.writerows(data)
+
+@app.route('/student/<docid>', methods=['GET', 'POST'])
 def student(docid):
-    return render_template('home/student.html')
+    time_table1=read_csv('./uploads/output.csv')
+    time_table2=read_csv('./uploads/output2.csv')
+    return render_template('home/student.html',docid=docid,tt1=time_table1,tt2=time_table2)
+@app.route('/display_graph', methods=['GET', 'POST'])
+def display_graph():
+    # Path to the CSV file containing x values
+    csv_file_path = './uploads/Section-A Period1.csv'
+
+    # Lists to store data
+    x_values = []
+    y_values = [1,2,3,4,5,6,7,8,9,10]  # Example y values
+
+    # Read data from the CSV file
+    with open(csv_file_path, 'r') as file:
+        csv_reader = csv.reader(file)
+        for row in csv_reader:
+            x_values.append(float(row[0]))  # Convert values to float assuming the first column contains x values
+
+    # Create a Plotly trace for the scatter plot
+    trace = go.Scatter(x=y_values, y=x_values, mode='lines', marker=dict(color='yellow'))
+
+    # Create layout for the graph
+    layout = go.Layout(
+        xaxis=dict(title='X-axis'),      # Set label for x-axis
+        yaxis=dict(title='Y-axis'),      # Set label for y-axis
+        plot_bgcolor='black',            # Set background color
+        paper_bgcolor='black',           # Set background color
+        font=dict(color='white')         # Set text color
+    )
+
+    # Create the figure
+    fig = go.Figure(data=[trace], layout=layout)
+
+    # Get the HTML representation of the graph
+    graph_html = fig.to_html(full_html=False)
+
+    return graph_html
+
+
 
 @app.route('/teacher/<docid>', methods=['GET', 'POST'])
 def teacher(docid):
-    return render_template('home/teacher.html')
+    time_table1 = read_csv('./uploads/english_teacher_timetable.csv')
+    time_table2 = read_csv('./uploads/maths_teacher_timetable.csv')
+    return render_template('home/teacher.html', docid=docid, tt1=time_table1, tt2=time_table2)
+
 
 @app.route('/admin/<docid>',methods=['GET', 'POST'])
 def admin(docid):
-    return render_template('home/logged.html')
+    graph_html = display_graph()
+    teacher_name = "Teacher1"
+    class_timing = "Class_1A at 9:00 am"
+    org = db.collection(user['collection'])
+    students = org.where('role', '==', 'student').stream()
+    teachers = org.where('role', '==', 'teacher').stream()
+    teachers_list, students_list = [], []
+    for doc in students:
+            students_list.append(doc.to_dict())
+    for doc in teachers:
+            teachers_list.append(doc.to_dict())
+    return render_template('home/logged.html',docid=docid,students=students_list,teachers=teachers_list,teacher_name=teacher_name,class_timing=class_timing,graph_html=graph_html)
 
 @app.route('/logout', methods=['GET','POST'])
 def logout():
@@ -308,11 +437,11 @@ def logout():
         session.pop()
     return redirect(url_for('notlogged'))
 
-@app.route('/profile', methods=['GET','POST'])
-def profile():
+@app.route('/profile/<docid>', methods=['GET','POST'])
+def profile(docid):
     user_details = userdetails
     print(user_details)
-    return render_template('components/profile.html',user_details=user_details)
+    return render_template('components/profile.html',user_details=user_details,docid=docid)
 
 @app.route('/workflow', methods=['GET','POST'])
 def workflow():
@@ -354,20 +483,90 @@ def workflow():
     return render_template('components/workflow.html')
 
 
-@app.route('/update_lesson', methods=['POST', 'GET'])
-def update_lesson():
-    response_text = ''
+@app.route('/update_lesson/<docid>', methods=['POST', 'GET'])
+def update_lesson(docid):
+    
     if request.method == 'POST':
+        
+        # print(request.form)
+        classname = request.form['class']
+        # section = request.form['section']
+        subject = request.form['subject']
+        lesson_number = request.form['lesson_number']
+        
         if 'lesson_pdf' in request.files:
             lesson = request.files['lesson_pdf']
+        
             file_path_lesson = os.path.join(app.config['UPLOAD_FOLDER'], 'lesson.pdf')
             lesson.save(file_path_lesson)
-            #response = createquestions(file_path_lesson)
-            #response_text = response['output_text']
-            
-            #response_text = json.loads(response_text)
-    return render_template('components/update_lesson.html')
+            response = createquestions(file_path_lesson)
+            print(f"updated mcq type questions are:- {response}")
+            # response_text=json.loads(response['output_text'])
+            # print(response_text['Remembering'])
+            # for topic in response_text:
+            #     for question in response_text[topic]:
+            #         pass
+                    # data = supabase.table("descriptive").insert({'class':classname, 'subject': subject, 'lesson': lesson_number, 'bloom_taxonomy_tag': topic, 'question': question}).execute()
 
+                
+            # response_text = json.loads(response_text)
+    return render_template('components/update_lesson.html',docid=docid)
+
+@app.route('/taketest', methods=['POST', 'GET'])
+def taketest(): 
+    subject = request.args.get('subject')
+    lesson = request.args.get('lesson')
+    classname = request.args.get('classname')
+    print(f" take test printing {subject}, {classname}, {lesson}")
+    if request.method == 'POST':
+        print("entered request of score ")
+        score_data = request.get_json()
+        score = score_data.get('score')
+        if score_data and score:
+            print(f'Received score: {score} for subject: {subject} in lesson: {lesson}')
+            print(user)
+            # Here, you can save the score to the database or perform any other necessary actions
+            test_id = f"{userdetails['class']}-{subject}-{lesson}"
+            test_id_score = f"{userdetails['class']}-{subject}-{lesson}-{score}"
+
+# Combine both updates into a single call
+            org = db.collection(user['collection']).document(user['docid'])
+            org.update({test_id: True,test_id_score: score})
+
+            return jsonify({'message': 'Score received successfully'})
+    # if score:
+    #     print(f"{score} trying to send to db")
+    #     testid = f"{subject}-{lesson}"
+    #     testidscore = f"{subject}-{lesson}-{score}"
+    #     db.collection(user['collection'].document[user['docid']].update({testid: True}))
+    #     db.collection(user['collection'].document[user['docid']].update({testidscore: score}))
+
+    response = retrivequestions(subject, classname, lesson)
+    if response:
+        print(response[1])
+        return render_template('components/taketest.html', response=response[1][:10])
+    return render_template('components/taketest.html')
+
+
+@app.route('/maketest/<docid>', methods=['POST', 'GET'])
+def maketest(docid):
+    if request.method == 'POST':
+        class_value = request.form['class']
+        section_value = request.form['section']
+        subject_value = request.form['subject']
+        lesson_value = request.form['lesson']
+        print(user['collection'])
+        createtest(user['collection'],class_value, section_value, subject_value, lesson_value)
+    return render_template('components/maketest.html',docid=docid)
+
+
+@app.route('/tests/<docid>',methods=['POST', 'GET'])
+def testpage(docid):
+    print(userdetails)
+    test = getmytests()
+    # print(test)
+    classname = userdetails['class']
+    return render_template('components/testpage.html', tests=test, classname=classname,docid=docid)
 
 if __name__ == '__main__':
     app.run(debug=True)

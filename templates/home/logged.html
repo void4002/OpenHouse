@@ -48,6 +48,29 @@
         .workflow-card:hover {
             box-shadow: 0 0 1.5rem rgba(0, 0, 0, 0.8); /* Larger shadow on hover */
         }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin-top: 20px;
+        }
+        tbody{
+            text-align: center;
+        }
+        th, td {
+            padding: 8px;
+            text-align: center;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #000;
+            color:#7c3aed;
+        }
+
+        td {
+            background-color: #333;
+            color: white
+        }
     </style>
 </head>
 <body>
@@ -73,7 +96,7 @@
                 <!-- user nav -->
                 <div class="flex items-center space-x-1">
                     <!-- Profile icon -->
-                    <a href="/profile" class="flex items-center py-2 px-3 nav-link-violet hover:text-gray-900">
+                    <a href="/profile/{{ docid }}" class="flex items-center py-2 px-3 nav-link-violet hover:text-gray-900">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                             <path d="M12 12a5 5 0 100-10 5 5 0 000 10zm0 2c-2.7 0-8 1.3-8 4v3h16v-3c0-2.7-5.3-4-8-4z" />
                         </svg>
@@ -93,15 +116,73 @@
     </header>
 
     <!-- Workflow Card -->
-    <div class="max-w-6xl mx-auto px-4 py-8">
-        <div class="workflow-card border-dashed border-gray-400 rounded-lg flex justify-center items-center">
-            <!-- Button to Add Workflow with custom class -->
-            <a href="/workflow">
-                <button class="btn-violet py-3 px-8 rounded-md hover:bg-violet-600">
-                    Add Workflow
-                </button>
-            </a>
+    <!-- Workflow Card -->
+<div class="max-w-6xl mx-auto px-4 py-8">
+    <!-- Table for Students Data -->
+    <div class="mb-8">
+        <h2 class="text-xl font-bold mb-4">Students</h2>
+        <div class="max-w-6xl mx-auto px-4 py-8">
+            <table id="students_table">
+                <thead>
+                    <tr>
+                        <th class="px-4 py-2">Name</th>
+                        <th class="px-4 py-2">Email</th>
+                        <th class="px-4 py-2">Subject</th>
+                        <th class="px-4 py-2">Section</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for student in students %}
+                    <tr>
+                        <td class=" px-4 py-2">{{ student.name }}</td>
+                        <td class=" px-4 py-2">{{ student.email }}</td>
+                        <td class=" px-4 py-2">{{ student.class }}</td>
+                        <td class=" px-4 py-2">{{ student.section }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+                
+            </table>
         </div>
     </div>
+    <!-- Table for Teachers Data -->
+    <div class="mb-8">
+        <h2 class="text-xl font-bold mb-4">Teachers</h2>
+        <table class="table-auto">
+            <thead>
+                <tr>
+                    <th class="px-4 py-2">Name</th>
+                    <th class="px-4 py-2">Email</th>
+                    <th class="px-4 py-2">Subject</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for teacher in teachers %}
+                <tr>
+                    <td class=" px-4 py-2">{{ teacher.name }}</td>
+                    <td class=" px-4 py-2">{{ teacher.email }}</td>
+                    <td class=" px-4 py-2">{{ teacher.subject_name }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+<div style="text-align: center;">
+    <a href="/workflow">
+        <button class="btn-violet py-3 px-8 rounded-md hover:bg-violet-600">
+            Add Workflow
+        </button>
+    </a>
+</div>
+<div style="padding-top: 20px;"></div> <!-- Empty div for spacing -->
+<div style="padding-top: 10px; text-align: center;">
+    <h2>Teacher: {{ teacher_name }}</h2>
+    <h2>Class Timing: {{ class_timing }}</h2>
+    <h3>Graph for Class_1A</h3>
+    {{ graph_html | safe }}
+</div>
+    
+
 </body>
 </html>

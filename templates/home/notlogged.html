@@ -25,6 +25,7 @@
             width: 100%;
             z-index: 1000;
             background-color: rgba(0, 0, 0, 0);
+            transition: background-color 0.3s ease; /* Smooth transition for background color */
         }
         .navbar ul {
             list-style: none;
@@ -86,6 +87,27 @@
             overflow: hidden; /* Ensure content stays within the section */
             position: relative;
         }
+        /* Add styles for cards */
+        .card {
+            transition: transform 0.3s ease;
+            border: 2px solid transparent; /* Set initial border color */
+            border-radius: 0.375rem; /* Set border radius */
+        }
+        .card:hover {
+            transform: translateY(-5px); /* Lift the card slightly on hover */
+            border-color: #7c3aed; /* Change border color to violet */
+        }
+        /* Text styles */
+        .card h3 {
+            font-size: 1.4rem;
+            font-weight: bold;
+            color: #fff;
+            margin-bottom: 0.5rem;
+        }
+        .card p {
+            font-size: 1.1rem;
+            color: #fff;
+        }
     </style>
 </head>
 <body>
@@ -95,7 +117,7 @@
                 <svg class="h-6 w-6 mr-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c-.3-.922-1.603-.922-1.902 0L5.138 12H2.25a.75.75 0 000 1.5h3.645a.75.75 0 01.673.51l1.812 5.443a.75.75 0 001.34 0l1.812-5.443a.75.75 0 01.673-.51h3.645a.75.75 0 000-1.5h-2.888L11.049 2.927z" />
                 </svg>
-                <span class="font-bold">OurApp</span>
+                <span class="font-bold">EduTransform</span>
             </a>
             <li>
                 <ul class="flex items-center space-x-4">
@@ -108,13 +130,34 @@
 
     <div class="hero-section" id="hero-section">
         <div class="overlay">
-            <h1>Welcome to OurApp!</h1>
-            <p>Discover our features and how we can help you achieve more.</p>
+            <h1>Welcome to EduTransform!</h1>
+            <p>EduTransform is a cutting-edge educational platform dedicated to revolutionizing the way we learn and teach. With innovative features and advanced technologies, we empower educators and learners to achieve their full potential.</p>
         </div>
     </div>
-
-    <div class="main-section">
-      
+    <div class="main-section" id="main-section">
+        <h2 class="text-3xl text-white text-center mb-8">What We Do</h2>
+        <div class="flex justify-around">
+            <!-- Card 1 -->
+            <div class="w-64 bg-black border-2 border-white rounded-lg p-4 card">
+                <h3 class="text-m font-semibold text-white mb-2">AI Assignments</h3>
+                <p class="text-white">AI Assignments is a feature that automatically generates assignments based on lesson PDFs using artificial intelligence algorithms. Teachers can upload lesson materials in PDF format, and the system analyzes the content to create customized assignments tailored to the lesson topics.</p>
+            </div>
+            <!-- Card 2 -->
+            <div class="w-64 bg-black border-2 border-white rounded-lg p-4 card">
+                <h3 class="text-m font-semibold text-white mb-2">Emotion based feedback</h3>
+                <p class="text-white">Emotion based feedback is a feature that enables teachers to provide feedback to students based on their emotional state. Using sentiment analysis techniques, the system analyzes student responses and provides personalized feedback tailored to their emotions.</p>
+            </div>
+            <!-- Card 3 -->
+            <div class="w-64 bg-black border-2 border-white rounded-lg p-4 card">
+                <h3 class="text-m font-semibold text-white mb-2">TimeTable Generation</h3>
+                <p class="text-white">TimeTable Generation is a feature designed to automate the process of creating class schedules. It takes into account various constraints such as teacher availability, classroom availability, and student preferences to generate optimized timetables for schools or educational institutions.</p>
+            </div>
+            <!-- Card 4 -->
+            <div class="w-64 bg-black border-2 border-white rounded-lg p-4 card">
+                <h3 class="text-m font-semibold text-white mb-2">Student paced worksheets</h3>
+                <p class="text-white">Student paced worksheets is a feature that allows students to progress through educational materials at their own pace. Teachers can create interactive worksheets with self-assessment tools, enabling students to learn and practice topics independently while receiving immediate feedback.</p>
+            </div>
+        </div>
     </div>
 
     <script>
